@@ -57,7 +57,7 @@ class FinewebProcessor:
         """
         # Download the dataset
         #fw = load_dataset("HuggingFaceFW/fineweb-edu", name=self.remote_name, split="train")
-        fw = load_dataset("AIGym/reflex-ai-fineweb-ultra-mini", split="train")
+        fw = load_dataset("AIGym/ajibawa-2023-wikihow", split="train")
         
         # Tokenize all documents and write output shards, each of shard_size tokens (last shard has remainder)
         nprocs = max(1, os.cpu_count()//2)
@@ -100,4 +100,4 @@ class FinewebProcessor:
                 self.write_datafile(filename, all_tokens_np[:token_count])
                 
         print(f"Processed FineWeb-Edu dataset into {shard_index+1} shards in {self.data_cache_dir}")
-        return shard_index + 1 
+        return shard_index + 1

@@ -13,6 +13,7 @@ import torch.distributed as dist
 from nanogpt.data.dataloader import DataLoaderLite
 from nanogpt.training.optimizer import get_lr, create_optimizer
 from nanogpt.data.datasets.hellaswag import iterate_examples, render_example, get_most_likely_row
+from nanogpt.tokenizer.tokenizer import Tokenizer
 
 class Trainer:
     """
@@ -49,6 +50,9 @@ class Trainer:
         
         # Create optimizer
         self.optimizer = create_optimizer(self.raw_model, config, config.device)
+        
+        # Initialize tokenizer
+        self.tokenizer = Tokenizer()
         
         # Create data loaders
         self.train_loader = DataLoaderLite(
@@ -283,7 +287,7 @@ class Trainer:
         self.model.eval()
         num_return_sequences = 4
         max_length = 32
-        tokens = enc.encode("Hello, I'm a language model,")
+        tokens = self.tokenizer.encode("Hello, I'm a language model,")
         tokens = torch.tensor(tokens, dtype=torch.long)
         tokens = tokens.unsqueeze(0).repeat(num_return_sequences, 1)
         xgen = tokens.to(self.device)
@@ -322,7 +326,7 @@ class Trainer:
         if self.master_process:
             for i in range(num_return_sequences):
                 tokens = xgen[i, :max_length].tolist()
-                decoded = enc.decode(tokens)
+                decoded = self.tokenizer.decode(tokens)
                 print(f"Sample {i}: {decoded}")
     
     def train(self, num_steps):
@@ -358,4 +362,4 @@ class Trainer:
         
         # Clean up
         if self.config.distributed:
-            destroy_process_group() 
+            destroy_process_group()
